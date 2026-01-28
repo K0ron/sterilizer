@@ -1,0 +1,3 @@
+/Users/keks/Desktop/Free/projets-perso/sterilizer/build/CMakeFiles/Sterilizer.dir
+/Users/keks/Desktop/Free/projets-perso/sterilizer/build/CMakeFiles/edit_cache.dir
+/Users/keks/Desktop/Free/projets-perso/sterilizer/build/CMakeFiles/rebuild_cache.dir
