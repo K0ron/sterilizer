@@ -38,7 +38,7 @@ private:
     State currentState;
 
     float currentTemperature;
-    bool heatingActive; 
+    bool heaterActive; 
 
     bool timerActive;
     chrono::steady_clock::time_point timerStart;
