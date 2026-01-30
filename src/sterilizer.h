@@ -9,12 +9,14 @@ enum class State {
     IDLE,
     HEATING,
     HOLD,
-    FINISHED
+    FINISHED,
+    ERROR,
 };
 
 struct Configuration {
     float targetTemperature;
     int durationSeconds; 
+
 };
 
 // Main class representing the sterilizer device
@@ -27,6 +29,10 @@ public:
     void start();
     void stop();
     void update(); // Called in loop to simulate heating
+    void emergencyStop();
+    void reset();
+    void checkOverheat();
+    void triggerError(const string&);
 
     //Getters
     float getTemperature() const;
@@ -42,6 +48,12 @@ private:
 
     bool timerActive;
     chrono::steady_clock::time_point timerStart;
+    chrono::steady_clock::time_point lastHeatUpdate;
+
+    int lastDisplayRemainingTime;
+
+    static constexpr double MAX_TEMPERATURE = 150.0;
+    static constexpr double OVER_TARGET_MARGIN = 10.0;
 
 };
 
