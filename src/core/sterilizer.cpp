@@ -1,10 +1,11 @@
 #include "sterilizer.h"
+#include <QString>
 #include <iostream>
 #include <iomanip>
 using namespace std;
 
 
-Sterilizer::Sterilizer() {
+Sterilizer::Sterilizer(QObject* parent) : QObject(parent) {
     currentTemperature = 20.0f; // Ambient temperature
     currentState = State::IDLE;
     heaterActive = false;
@@ -24,10 +25,20 @@ void Sterilizer::configure(float temperature, int durationSec) {
 }
 
 void Sterilizer::start() {
-    if (currentState == State::IDLE) {
+if (currentState == State::IDLE) {
+    if (config.targetTemperature <= 0.0f || config.durationSeconds <= 0) {
+    triggerError("Not configured");
+    return;
+}
         currentState = State::HEATING;
         heaterActive = true;
         timerActive = false;
+
+        lastHeatUpdate = std::chrono::steady_clock::now();
+        lastDisplayRemainingTime = -1;
+
+        emit stateChanged();
+
 
         cout << "Sterilizer started" << endl;
     }
@@ -46,36 +57,37 @@ void Sterilizer::update() {
     if (currentState == State::ERROR) {
         return;
     }
-    checkOverheat();
-
-    auto now = chrono::steady_clock::now();
-
+    
+    auto now = std::chrono::steady_clock::now();
+    
     // Heating State
     if (currentState == State::HEATING) {
+        checkOverheat();
 
         // every 3s -> +1°C
-        if (now - lastHeatUpdate >= chrono::seconds(3)) {
+        if (now - lastHeatUpdate >= std::chrono::seconds(3)) {
             currentTemperature += 1.0f;
-            lastHeatUpdate = now;
+            lastHeatUpdate = std::chrono::steady_clock::now();
 
-            cout << "Heating... Temp = "
-                 << currentTemperature << "°C" << endl;
+            emit temperatureChanged(); 
         }
 
-        // Temperature reached -> Holding temaperature
+        // Temperature reached -> Holding temperature
         if (currentTemperature >= config.targetTemperature) {
-            currentState = State::HOLD; 
+            currentState = State::HOLD;
             heaterActive = false;
-            timerActive = true; 
+            timerActive = true;
             timerStart = now;
 
-            cout << "Target temperature reached. Holding..." << endl;
+            emit stateChanged();           
+            emit remainingTimeChanged();   
+
+            
         }
     }
 
     // Hold State
     if (currentState == State::HOLD && timerActive) {
-        // Regulation temperature
         static constexpr double HOLD_HYSTERESIS = 1.0;
 
         if (currentTemperature <= config.targetTemperature - HOLD_HYSTERESIS) {
@@ -86,36 +98,29 @@ void Sterilizer::update() {
         }
 
         // Timer
-        auto elapsed = chrono::duration_cast<chrono::seconds>(now - timerStart).count();
-
-        int remaining = config.durationSeconds - elapsed;
-
+        auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - timerStart).count();
+        int remaining = config.durationSeconds - static_cast<int>(elapsed);
         if (remaining < 0) remaining = 0;
 
         if (remaining != lastDisplayRemainingTime) {
             lastDisplayRemainingTime = remaining;
 
-            int hours = remaining / 3600;
-            int minutes = (remaining % 3600) / 60;
-            int seconds = remaining % 60;
+            emit remainingTimeChanged(); // ✅
 
-              cout << "Holding... remaining time : "
-                   << setw(2) << setfill('0') << hours << ":"
-                   << setw(2) << setfill('0') << minutes << ":"
-                   << setw(2) << setfill('0') << seconds 
-                   << endl;
+        
         }
-
 
         if (remaining <= 0) {
             currentState = State::FINISHED;
             timerActive = false;
 
-            cout << "Sterilizer finished!" << endl;
+            emit stateChanged();         // ✅
+            emit remainingTimeChanged(); // ✅ (devient 0)
+
         }
     }
-
 }
+
 
 
 void Sterilizer::emergencyStop() {
@@ -161,15 +166,25 @@ void Sterilizer::checkOverheat() {
 
 
 // Getters
-float Sterilizer::getTemperature() const {
+float Sterilizer::temperature() const {
     return currentTemperature;
 }
 
-State Sterilizer::getState() const {
+State Sterilizer::state() const {
     return currentState;
 }
 
-int Sterilizer::getRemainingTime() const {
-    return 0;
+int Sterilizer::remainingTime() const {
+    if (currentState != State::HOLD || !timerActive) {
+        return 0;
+    }
+
+    auto now = std::chrono::steady_clock::now();
+    auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - timerStart).count();
+
+    int remaining = config.durationSeconds - static_cast<int>(elapsed);
+    if (remaining < 0) remaining = 0;
+    return remaining;
 }
+
 

@@ -1,58 +1,30 @@
-#include <sterilizer.h>
-#include <thread>
-#include <iostream>
-using namespace std;
+#include <QGuiApplication>
+#include <QQmlApplicationEngine>
+#include <QQmlContext>
+#include <QTimer>
+#include <QDir>
+#include <QDebug>
 
-int main() {
+#include "core/sterilizer.h"
 
-    float temperature; 
-    int hours;
-    int minutes;
+int main(int argc, char *argv[])
 
-    cout << "==== Sterilizer configuration ====" << endl;
+{
+    qDebug() << "QRC /qml contents:" << QDir(":/qml").entryList();
+    QGuiApplication app(argc, argv);
 
-    cout << "Target Temperature (°C): ";
-    cin >> temperature; 
+    QQmlApplicationEngine engine;
 
-    cout << "Duration hours: ";
-    cin >> hours;
-
-    cout << "Duration minutes: ";
-    cin >> minutes;
-
-
-    //Minimal security checks
-    if (temperature <= 0 || hours < 0 || minutes < 0 || minutes >= 60) {
-        cout << "Invalid configuration." << endl;
-        return 1;
-    } 
-
-    int durationSeconds = (hours * 3600) + (minutes * 60);
-
-    if (durationSeconds <= 0) {
-        cout << "Duration must be greater than 0." << endl;
-        return 1;
-    }
-
-    
     Sterilizer sterilizer;
+    engine.rootContext()->setContextProperty("sterilizer", &sterilizer);
 
-    sterilizer.configure(temperature, durationSeconds);
-    sterilizer.start();
-    // this_thread::sleep_for(chrono::seconds(3));
-    // sterilizer.emergencyStop();
-    // this_thread::sleep_for(chrono::seconds(2));
-    // sterilizer.reset();
+    QTimer tick;
+    QObject::connect(&tick, &QTimer::timeout, &sterilizer, &Sterilizer::update);
+    tick.start(100);
 
+    engine.load(QUrl(QStringLiteral("qrc:/qml/Main.qml")));
+    if (engine.rootObjects().isEmpty())
+        return -1;
 
-    while (true) {
-        sterilizer.update();
-        this_thread::sleep_for(chrono::milliseconds(100));
-
-        if (sterilizer.getState() == State::FINISHED) {
-            break;
-        }
-    }
-    
-    return 0;
+    return app.exec();
 }

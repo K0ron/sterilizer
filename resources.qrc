@@ -1,0 +1,14 @@
+<RCC>
+  <qresource prefix="/qml">
+    <file alias="Main.qml">src/qml/Main.qml</file>
+
+    <file alias="screens/Home.qml">src/qml/screens/Home.qml</file>
+    <file alias="screens/Program.qml">src/qml/screens/Program.qml</file>
+    <file alias="screens/Running.qml">src/qml/screens/Running.qml</file>
+
+    <file alias="components/TimeInlinePicker.qml">src/qml/components/TimeInlinePicker.qml</file>
+
+
+    <file alias="theme/Theme.qml">src/qml/theme/Theme.qml</file>
+  </qresource>
+</RCC>
