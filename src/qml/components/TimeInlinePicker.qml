@@ -16,7 +16,7 @@ Item {
 
     // Edition mode
     property bool editing: false
-    property int editingPart: 0  // 0=hours, 1=minutes
+    property int editingPart: 0
 
     signal changed(int totalSeconds)
     signal committed(int totalSeconds)
@@ -46,25 +46,15 @@ Item {
         changed(totalSeconds);
     }
 
-    Rectangle {
-        anchors.fill: parent
-        radius: 16
-        color: '#c90000'
-        border.color: "#e5e5e5"
-        border.width: 1
-    }
-
     // CHANGED: affichage devant (cases), toujours visible
     Row {
         id: displayRow
         anchors.left: parent.left
         anchors.verticalCenter: parent.verticalCenter
         spacing: 14
-        z: 1
 
         // hours case
         Row {
-            spacing: 6
 
             Rectangle {
                 id: hoursBox
@@ -120,7 +110,7 @@ Item {
                         gradient: Gradient {
                             GradientStop {
                                 position: 0.0
-                                color: "#f5f5f5"
+                                color: "#e7e7e7"
                             }
                             GradientStop {
                                 position: 1.0
@@ -145,7 +135,7 @@ Item {
                             }
                             GradientStop {
                                 position: 1.0
-                                color: "#f5f5f5"
+                                color: "#e7e7e7"
                             }
                         }
                     }
@@ -205,11 +195,10 @@ Item {
 
         // minutes case
         Row {
-            spacing: 6
 
             Rectangle {
                 id: minutesBox
-                radius: 16
+                radius: 12
                 width: 110
                 height: 64
                 clip: false
@@ -259,7 +248,7 @@ Item {
                         gradient: Gradient {
                             GradientStop {
                                 position: 0.0
-                                color: "#f5f5f5"
+                                color: "#e7e7e7"
                             }
                             GradientStop {
                                 position: 1.0
@@ -284,7 +273,7 @@ Item {
                             }
                             GradientStop {
                                 position: 1.0
-                                color: "#f5f5f5"
+                                color: "#e7e7e7"
                             }
                         }
                     }
@@ -346,11 +335,10 @@ Item {
 
         // secondes case
         Row {
-            spacing: 6
 
             Rectangle {
                 id: secondesBox
-                radius: 16
+                radius: 12
                 width: 100
                 height: 64
                 clip: false
@@ -369,6 +357,14 @@ Item {
                 font.pixelSize: 20
                 anchors.verticalCenter: secondesBox.verticalCenter
             }
+        }
+
+        Rectangle {
+            width: 2
+            radius: 2
+            height: parent.height
+            color: "#e5e5e5"
+            anchors.verticalCenter: parent.verticalCenter
         }
     }
 }

@@ -7,6 +7,7 @@
     <file alias="screens/Running.qml">src/qml/screens/Running.qml</file>
 
     <file alias="components/TimeInlinePicker.qml">src/qml/components/TimeInlinePicker.qml</file>
+    <file alias="components/TemperaturePicker.qml">src/qml/components/TemperaturePicker.qml</file>
 
 
     <file alias="theme/Theme.qml">src/qml/theme/Theme.qml</file>
