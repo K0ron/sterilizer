@@ -41,4 +41,14 @@ ApplicationWindow {
             }
         }
     }
+
+    StartButton {
+        y: 250
+        anchors.horizontalCenter: parent.horizontalCenter
+        enabled: true
+
+        onClicked: {
+            console.log("START pressed");
+        }
+    }
 }
