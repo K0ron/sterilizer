@@ -51,4 +51,24 @@ ApplicationWindow {
             console.log("START pressed");
         }
     }
+
+    property bool running: false
+    property bool errorState: false
+
+    StopResetButton {
+        x: 500
+        y: 300
+
+        mode: errorState ? "reset" : (running ? "stop" : "reset")
+        enabled: running || errorState
+
+        onStopClicked: {
+            console.log("STOP");
+            running: false;
+        }
+        onResetClicked: {
+            console.log("RESET");
+            errorState = false;
+        }
+    }
 }
