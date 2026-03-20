@@ -1,8 +1,6 @@
 #include "sterilizer.h"
 #include <QString>
 #include <iostream>
-#include <iomanip>
-#include <QDebug>
 using namespace std;
 
 
@@ -14,8 +12,6 @@ Sterilizer::Sterilizer(QObject* parent) : QObject(parent) {
 
     config.targetTemperature = 0.0f;
     config.durationSeconds = 0;
-
-    lastDisplayRemainingTime = -1;
 
     m_remainingTime = 0;
 }
@@ -29,7 +25,6 @@ void Sterilizer::configure(float temperature, int durationSec) {
         m_remainingTime = durationSec;
         emit remainingTimeChanged();
     }
-
 }
 
 void Sterilizer::start() {
@@ -119,8 +114,7 @@ void Sterilizer::update() {
             currentTemperature += 1.0f;
             lastHeatUpdate = std::chrono::steady_clock::now();
 
-            qDebug() << "temperatureChanged emitted" << currentTemperature;
-            emit temperatureChanged(); 
+            emit temperatureChanged();
         }
 
         // Temperature reached -> Holding temperature
@@ -152,14 +146,6 @@ void Sterilizer::update() {
         auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - timerStart).count();
         int remaining = config.durationSeconds - static_cast<int>(elapsed);
         if (remaining < 0) remaining = 0;
-
-        // if (remaining != lastDisplayRemainingTime) {
-        //     lastDisplayRemainingTime = remaining;
-
-        //     emit remainingTimeChanged(); 
-        // }
-            std::cout << "remaining=" << remaining << std::endl;
-
 
         if (remaining != m_remainingTime) {
             m_remainingTime = remaining;
@@ -242,26 +228,3 @@ void Sterilizer::checkOverheat() {
 float Sterilizer::temperature() const { return currentTemperature; }
 State Sterilizer::state() const { return currentState; }
 int Sterilizer::remainingTime() const { return m_remainingTime; }
-
-
-// float Sterilizer::temperature() const {
-//     return currentTemperature;
-// }
-
-// State Sterilizer::state() const {
-//     return currentState;
-// }
-
-// int Sterilizer::remainingTime() const {
-//     if (currentState != State::HOLD || !timerActive) {
-//         return 0;
-//     }
-
-//     auto now = std::chrono::steady_clock::now();
-//     auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - timerStart).count();
-
-//     int remaining = config.durationSeconds - static_cast<int>(elapsed);
-//     if (remaining < 0) remaining = 0;
-//     return remaining;
-// }
-

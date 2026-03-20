@@ -50,6 +50,21 @@ Item {
         changed(draftSeconds);
     }
 
+    function commitSelection() {
+        if (!editing)
+            return;
+        editing = false;
+        commitTimer.stop();
+        committed(draftSeconds);
+    }
+
+    Timer {
+        id: commitTimer
+        interval: 1000
+        repeat: false
+        onTriggered: root.commitSelection()
+    }
+
     // CHANGED: affichage devant (cases), toujours visible
     Row {
         id: displayRow
@@ -83,6 +98,7 @@ Item {
                         if (!root.editing)
                             return;
                         root.setHours(currentIndex);
+                        commitTimer.restart();
                     }
 
                     delegate: Item {
@@ -167,17 +183,13 @@ Item {
                     font.bold: true
                 }
 
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: {
-                        if (root.editing && root.editingPart === 0) {
-                            root.editing = false;
-                            root.committed(root.draftSeconds);
-                        } else {
-                            root.draftSeconds = root.totalSeconds;
-                            root.editing = true;
-                            root.editingPart = 0;
-                        }
+                TapHandler {
+                    enabled: !root.editing
+                    onTapped: {
+                        commitTimer.stop();
+                        root.draftSeconds = root.totalSeconds;
+                        root.editing = true;
+                        root.editingPart = 0;
                     }
                 }
             }
@@ -223,6 +235,7 @@ Item {
                         if (!root.editing)
                             return;
                         root.setMinutes(currentIndex * root.minuteStep);
+                        commitTimer.restart();
                     }
 
                     delegate: Item {
@@ -283,7 +296,6 @@ Item {
                         }
                     }
 
-                    Component.onCompleted: console.log("hoursBox.x", hoursBox.x, "minutesBox.x", minutesBox.x)
                 }
 
                 Rectangle {
@@ -308,17 +320,13 @@ Item {
                     font.bold: true
                 }
 
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: {
-                        if (root.editing && root.editingPart === 1) {
-                            root.editing = false;
-                            root.committed(root.draftSeconds);
-                        } else {
-                            root.draftSeconds = root.totalSeconds;
-                            root.editing = true;
-                            root.editingPart = 1;
-                        }
+                TapHandler {
+                    enabled: !root.editing
+                    onTapped: {
+                        commitTimer.stop();
+                        root.draftSeconds = root.totalSeconds;
+                        root.editing = true;
+                        root.editingPart = 1;
                     }
                 }
             }

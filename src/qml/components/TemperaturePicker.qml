@@ -28,6 +28,21 @@ Item {
         changed(t);
     }
 
+    function commitSelection() {
+        if (!editing)
+            return;
+        editing = false;
+        commitTimer.stop();
+        committed(selectedTemperature);
+    }
+
+    Timer {
+        id: commitTimer
+        interval: 1000
+        repeat: false
+        onTriggered: root.commitSelection()
+    }
+
     Row {
         id: displayRow
         spacing: 6
@@ -54,6 +69,7 @@ Item {
                         return;
                     const t = root.minTemperature + currentIndex * root.temperatureStep;
                     root.setSelectedTemperature(t);
+                    commitTimer.restart();
                 }
 
                 delegate: Item {
@@ -135,15 +151,11 @@ Item {
                 font.bold: true
             }
 
-            MouseArea {
-                anchors.fill: parent
-                onClicked: {
-                    if (root.editing) {
-                        root.editing = false;
-                        root.committed(root.selectedTemperature);
-                    } else {
-                        root.editing = true;
-                    }
+            TapHandler {
+                enabled: !root.editing
+                onTapped: {
+                    commitTimer.stop();
+                    root.editing = true;
                 }
             }
 

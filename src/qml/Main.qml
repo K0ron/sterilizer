@@ -44,22 +44,34 @@ ApplicationWindow {
                 height: 100
                 totalSeconds: (sterilizer.state === stateHeating || sterilizer.state === stateHold || sterilizer.state === stateFinished || sterilizer.state === statePaused) ? sterilizer.remainingTime : selectedSeconds
                 onCommitted: function (s) {
-                    console.log("Committed time:", s);
                     selectedSeconds = s;
                 }
             }
 
-            TemperaturePicker {
-                id: temperaturePicker
+            Item {
                 width: 200
-                height: 100
+                height: 128
 
-                selectedTemperature: selectedTemp
-                currentTemperature: sterilizer.temperature
+                TemperaturePicker {
+                    id: temperaturePicker
+                    width: 200
+                    height: 100
 
-                onCommitted: function (t) {
-                    console.log("Committed temp:", t);
-                    selectedTemp = t;
+                    selectedTemperature: selectedTemp
+                    currentTemperature: sterilizer.temperature
+
+                    onCommitted: function (t) {
+                        selectedTemp = t;
+                    }
+                }
+
+                HeatingIndicator {
+                    anchors.top: temperaturePicker.bottom
+                    anchors.topMargin: 8
+                    anchors.horizontalCenter: temperaturePicker.horizontalCenter
+                    active: sterilizer.state === stateHeating
+                    temperature: sterilizer.temperature
+                    visible: sterilizer.state === stateHeating
                 }
             }
         }
@@ -78,7 +90,6 @@ ApplicationWindow {
             enabled: sterilizer.state === stateHeating || sterilizer.state === stateHold || sterilizer.state === statePaused
 
             onEmergencyClicked: {
-                console.log("EMERGENCY STOP");
                 sterilizer.emergencyStop();
             }
         }
@@ -94,9 +105,6 @@ ApplicationWindow {
                 if (sterilizer.state === stateHeating || sterilizer.state === stateHold) {
                     sterilizer.pause();
                 } else {
-                    console.log("START pressed");
-                    console.log("TEMP", selectedTemp, "SEC", timePicker.totalSeconds);
-
                     if (sterilizer.state === stateIdle || sterilizer.state === stateFinished) {
                         sterilizer.configure(selectedTemp, selectedSeconds);
                     }
@@ -116,38 +124,8 @@ ApplicationWindow {
             enabled: sterilizer.state === statePaused || sterilizer.state === stateFinished || sterilizer.state === stateError
 
             onResetClicked: {
-                console.log("RESET");
                 sterilizer.reset();
             }
         }
-    }
-
-    Text {
-        text: "state=" + sterilizer.state + " remaining=" + sterilizer.remainingTime + " shown=" + timePicker.totalSeconds
-    }
-
-    Connections {
-        target: sterilizer
-        function onTemperatureChanged() {
-            console.log("QML saw temperatureChanged:", sterilizer.temperature);
-        }
-    }
-
-    Connections {
-        target: sterilizer
-        function onRemainingTimeChanged() {
-            console.log("QML remainingTimeChanged:", sterilizer.remainingTime);
-        }
-    }
-
-    Text {
-        x: 230
-        text: "REM_UI=" + sterilizer.remainingTime
-        anchors.top: parent.top
-    }
-
-    Text {
-        x: 310
-        text: "editing=" + timePicker.editing
     }
 }

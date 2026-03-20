@@ -64,8 +64,6 @@ private:
     bool timerActive = false;
     std::chrono::steady_clock::time_point timerStart{};
     std::chrono::steady_clock::time_point lastHeatUpdate{};
-
-    int lastDisplayRemainingTime = -1;
     
     int m_remainingTime = 0;
 
