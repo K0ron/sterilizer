@@ -8,7 +8,8 @@
     <file alias="components/TimeInlinePicker.qml">src/qml/components/TimeInlinePicker.qml</file>
     <file alias="components/TemperaturePicker.qml">src/qml/components/TemperaturePicker.qml</file>
     <file alias="components/StartButton.qml">src/qml/components/StartButton.qml</file>
-    <file alias="components/StopResetButton.qml">src/qml/components/StopResetButton.qml</file>
+    <file alias="components/ResetButton.qml">src/qml/components/ResetButton.qml</file>
+    <file alias="components/EmergencyButton.qml">src/qml/components/EmergencyButton.qml</file>
     <file alias="icons/pause-svgrepo-com.svg">src/qml/icons/pause-svgrepo-com.svg</file>
     <file alias="icons/play-svgrepo-com.svg">src/qml/icons/play-svgrepo-com.svg</file>
     <file alias="icons/stop-svgrepo-com.svg">src/qml/icons/stop-svgrepo-com.svg</file>

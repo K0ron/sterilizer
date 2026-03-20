@@ -8,6 +8,7 @@ Item {
 
     // API
     property int totalSeconds: 60
+    property int draftSeconds: totalSeconds
     property int maxHours: 12
     property int maxMinutes: 59
     property int minuteStep: 1
@@ -24,26 +25,29 @@ Item {
     function two(n) {
         return (n < 10 ? "0" : "") + n;
     }
+    function displayedTotalSeconds() {
+        return editing ? draftSeconds : totalSeconds;
+    }
     function hours() {
-        return Math.floor(totalSeconds / 3600);
+        return Math.floor(displayedTotalSeconds() / 3600);
     }
     function minutes() {
-        return Math.floor((totalSeconds % 3600) / 60);
+        return Math.floor((displayedTotalSeconds() % 3600) / 60);
     }
     function seconds() {
-        return totalSeconds % 60;
+        return displayedTotalSeconds() % 60;
     }
 
     function setHours(h) {
         const m = minutes();
-        totalSeconds = (h * 3600) + (m * 60) + seconds();
-        changed(totalSeconds);
+        draftSeconds = (h * 3600) + (m * 60) + seconds();
+        changed(draftSeconds);
     }
 
     function setMinutes(m) {
         const h = hours();
-        totalSeconds = (h * 3600) + (m * 60) + seconds();
-        changed(totalSeconds);
+        draftSeconds = (h * 3600) + (m * 60) + seconds();
+        changed(draftSeconds);
     }
 
     // CHANGED: affichage devant (cases), toujours visible
@@ -168,8 +172,9 @@ Item {
                     onClicked: {
                         if (root.editing && root.editingPart === 0) {
                             root.editing = false;
-                            root.committed(root.totalSeconds);
+                            root.committed(root.draftSeconds);
                         } else {
+                            root.draftSeconds = root.totalSeconds;
                             root.editing = true;
                             root.editingPart = 0;
                         }
@@ -308,8 +313,9 @@ Item {
                     onClicked: {
                         if (root.editing && root.editingPart === 1) {
                             root.editing = false;
-                            root.committed(root.totalSeconds);
+                            root.committed(root.draftSeconds);
                         } else {
+                            root.draftSeconds = root.totalSeconds;
                             root.editing = true;
                             root.editingPart = 1;
                         }

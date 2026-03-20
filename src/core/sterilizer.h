@@ -11,6 +11,7 @@ enum class State {
     HOLD,
     FINISHED,
     ERROR,
+    PAUSED,
 };
 
 struct Configuration {
@@ -30,7 +31,7 @@ public:
 
     Q_INVOKABLE void configure(float temperature, int durationSec);
     Q_INVOKABLE void start();
-    Q_INVOKABLE void stop();
+    Q_INVOKABLE void pause();
     Q_INVOKABLE void emergencyStop();
     Q_INVOKABLE void reset();
 
@@ -46,7 +47,6 @@ signals:
     void temperatureChanged();
     void stateChanged();
     void remainingTimeChanged();
-
     void errorOccurred(QString reason);
 
 private:
@@ -66,9 +66,12 @@ private:
     std::chrono::steady_clock::time_point lastHeatUpdate{};
 
     int lastDisplayRemainingTime = -1;
+    
+    int m_remainingTime = 0;
 
     static constexpr double MAX_TEMPERATURE = 150.0;
     static constexpr double OVER_TARGET_MARGIN = 10.0;
+
 };
 
-#endif 
+#endif // STERILIZER_H

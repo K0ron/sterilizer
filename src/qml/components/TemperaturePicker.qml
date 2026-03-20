@@ -179,7 +179,7 @@ Item {
             anchors.centerIn: parent
 
             Text {
-                text: root.currentTemperature === 0 ? "--" : root.currentTemperature
+                text: root.currentTemperature === 0 ? "--" : Math.round(root.currentTemperature)
                 font.pixelSize: 20
                 font.bold: false
             }

@@ -10,21 +10,22 @@
 int main(int argc, char *argv[])
 
 {
-    qDebug() << "QRC /qml contents:" << QDir(":/qml").entryList();
     QGuiApplication app(argc, argv);
-
-    QQmlApplicationEngine engine;
+    
+    qDebug() << "QRC /qml contents:" << QDir(":/qml").entryList();
 
     Sterilizer sterilizer;
+    
+    QQmlApplicationEngine engine;
     engine.rootContext()->setContextProperty("sterilizer", &sterilizer);
-
-    QTimer tick;
-    QObject::connect(&tick, &QTimer::timeout, &sterilizer, &Sterilizer::update);
-    tick.start(100);
 
     engine.load(QUrl(QStringLiteral("qrc:/qml/Main.qml")));
     if (engine.rootObjects().isEmpty())
         return -1;
 
+    QTimer tick;
+    QObject::connect(&tick, &QTimer::timeout, &sterilizer, &Sterilizer::update);
+    tick.start(100);
+  
     return app.exec();
 }

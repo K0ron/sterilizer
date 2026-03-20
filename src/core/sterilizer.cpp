@@ -2,11 +2,12 @@
 #include <QString>
 #include <iostream>
 #include <iomanip>
+#include <QDebug>
 using namespace std;
 
 
 Sterilizer::Sterilizer(QObject* parent) : QObject(parent) {
-    currentTemperature = 20.0f; // Ambient temperature
+    currentTemperature = 30.0f; // Ambient temperature
     currentState = State::IDLE;
     heaterActive = false;
     timerActive = false;
@@ -15,6 +16,8 @@ Sterilizer::Sterilizer(QObject* parent) : QObject(parent) {
     config.durationSeconds = 0;
 
     lastDisplayRemainingTime = -1;
+
+    m_remainingTime = 0;
 }
 
 // Public interface
@@ -22,35 +25,82 @@ void Sterilizer::configure(float temperature, int durationSec) {
     config.targetTemperature = temperature;
     config.durationSeconds = durationSec;
 
+    if (durationSec > 0) {
+        m_remainingTime = durationSec;
+        emit remainingTimeChanged();
+    }
+
 }
 
 void Sterilizer::start() {
-if (currentState == State::IDLE) {
     if (config.targetTemperature <= 0.0f || config.durationSeconds <= 0) {
-    triggerError("Not configured");
-    return;
-}
-        currentState = State::HEATING;
-        heaterActive = true;
-        timerActive = false;
+        triggerError("Not configured");
+        return;
+    }
 
-        lastHeatUpdate = std::chrono::steady_clock::now();
-        lastDisplayRemainingTime = -1;
+    auto now = std::chrono::steady_clock::now();
+
+    if (currentState == State::PAUSED) {
+        const int elapsedBeforePause = config.durationSeconds - m_remainingTime;
+
+        if (currentTemperature >= config.targetTemperature) {
+            currentState = State::HOLD;
+            heaterActive = false;
+            timerActive = true;
+            timerStart = now - std::chrono::seconds(elapsedBeforePause);
+        } else {
+            currentState = State::HEATING;
+            heaterActive = true;
+            timerActive = false;
+            lastHeatUpdate = now;
+        }
 
         emit stateChanged();
+        emit remainingTimeChanged();
 
-
-        cout << "Sterilizer started" << endl;
+        cout << "Sterilizer resumed" << endl;
+        return;
     }
+
+    if (currentState != State::IDLE) return;
+
+    currentState = State::HEATING;
+    heaterActive = true;
+    timerActive = false;
+    lastHeatUpdate = now;
+    m_remainingTime = config.durationSeconds;
+    emit remainingTimeChanged();
+
+    emit stateChanged();
+
+    cout << "Sterilizer started" << endl;
 }
 
-void Sterilizer::stop() {
-    currentState = State::IDLE;
+void Sterilizer::pause() {
+    if (currentState != State::HEATING && currentState != State::HOLD) return;
+
+    if (currentState == State::HOLD && timerActive) {
+        auto now = std::chrono::steady_clock::now();
+        auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - timerStart).count();
+        int remaining = config.durationSeconds - static_cast<int>(elapsed);
+        if (remaining < 0) remaining = 0;
+
+        if (remaining != m_remainingTime) {
+            m_remainingTime = remaining;
+            emit remainingTimeChanged();
+        }
+    }
+
+    currentState = State::PAUSED;
     heaterActive = false;
-    timerActive = false; 
+    timerActive = false;
 
-    cout << "Sterilizer stopped" << endl; 
+    emit stateChanged();
+
+    cout << "Sterilizer paused" << endl;
+    
 }
+
 
 void Sterilizer::update() {
 
@@ -69,6 +119,7 @@ void Sterilizer::update() {
             currentTemperature += 1.0f;
             lastHeatUpdate = std::chrono::steady_clock::now();
 
+            qDebug() << "temperatureChanged emitted" << currentTemperature;
             emit temperatureChanged(); 
         }
 
@@ -77,12 +128,12 @@ void Sterilizer::update() {
             currentState = State::HOLD;
             heaterActive = false;
             timerActive = true;
-            timerStart = now;
+            const int elapsedBeforeHold = config.durationSeconds - m_remainingTime;
+            timerStart = now - std::chrono::seconds(elapsedBeforeHold);
 
-            emit stateChanged();           
-            emit remainingTimeChanged();   
+            emit remainingTimeChanged();
+            emit stateChanged();
 
-            
         }
     }
 
@@ -102,20 +153,26 @@ void Sterilizer::update() {
         int remaining = config.durationSeconds - static_cast<int>(elapsed);
         if (remaining < 0) remaining = 0;
 
-        if (remaining != lastDisplayRemainingTime) {
-            lastDisplayRemainingTime = remaining;
+        // if (remaining != lastDisplayRemainingTime) {
+        //     lastDisplayRemainingTime = remaining;
 
-            emit remainingTimeChanged(); // ✅
+        //     emit remainingTimeChanged(); 
+        // }
+            std::cout << "remaining=" << remaining << std::endl;
 
-        
+
+        if (remaining != m_remainingTime) {
+            m_remainingTime = remaining;
+            emit remainingTimeChanged();
         }
 
         if (remaining <= 0) {
             currentState = State::FINISHED;
             timerActive = false;
 
-            emit stateChanged();         // ✅
-            emit remainingTimeChanged(); // ✅ (devient 0)
+            m_remainingTime = 0;
+            emit remainingTimeChanged(); 
+            emit stateChanged();
 
         }
     }
@@ -125,19 +182,30 @@ void Sterilizer::update() {
 
 void Sterilizer::emergencyStop() {
     heaterActive = false; 
+    timerActive = false;
     currentState = State::ERROR;
+
+    emit stateChanged();
+    emit errorOccurred("Emergency stop");
 
     cout << "!!! EMERGENCY STOP ACTIVATED !!!" << endl;
 }
 
 void Sterilizer::reset() {
-    if (currentState != State::ERROR) {
+    if (currentState != State::ERROR && currentState != State::FINISHED && currentState != State::PAUSED)
         return;
-    }
 
-    heaterActive = false; 
-    currentTemperature = 0.0;
+    heaterActive = false;
+    timerActive = false;
+
+    currentTemperature = 20.0f;
     currentState = State::IDLE;
+
+    m_remainingTime = 0;
+
+    emit temperatureChanged();
+    emit remainingTimeChanged();
+    emit stateChanged();
 
     cout << "System reset. Sterilizer is IDLE." << endl;
 }
@@ -145,6 +213,10 @@ void Sterilizer::reset() {
 void Sterilizer::triggerError(const string& reason) {
     currentState = State::ERROR;
     heaterActive = false;
+    timerActive = false;
+
+    emit stateChanged();
+    emit errorOccurred(QString::fromStdString(reason));
 
     cout << "ERROR: " << reason << endl;
 }
@@ -158,7 +230,7 @@ void Sterilizer::checkOverheat() {
     }
 
     // Relative security
-    if (currentTemperature >= config.targetTemperature + OVER_TARGET_MARGIN) {
+    if (config.targetTemperature > 0.0f && currentTemperature >= config.targetTemperature + OVER_TARGET_MARGIN) {
         triggerError("Overheat beyond target");
         return;
     }
@@ -166,25 +238,30 @@ void Sterilizer::checkOverheat() {
 
 
 // Getters
-float Sterilizer::temperature() const {
-    return currentTemperature;
-}
 
-State Sterilizer::state() const {
-    return currentState;
-}
+float Sterilizer::temperature() const { return currentTemperature; }
+State Sterilizer::state() const { return currentState; }
+int Sterilizer::remainingTime() const { return m_remainingTime; }
 
-int Sterilizer::remainingTime() const {
-    if (currentState != State::HOLD || !timerActive) {
-        return 0;
-    }
 
-    auto now = std::chrono::steady_clock::now();
-    auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - timerStart).count();
+// float Sterilizer::temperature() const {
+//     return currentTemperature;
+// }
 
-    int remaining = config.durationSeconds - static_cast<int>(elapsed);
-    if (remaining < 0) remaining = 0;
-    return remaining;
-}
+// State Sterilizer::state() const {
+//     return currentState;
+// }
 
+// int Sterilizer::remainingTime() const {
+//     if (currentState != State::HOLD || !timerActive) {
+//         return 0;
+//     }
+
+//     auto now = std::chrono::steady_clock::now();
+//     auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - timerStart).count();
+
+//     int remaining = config.durationSeconds - static_cast<int>(elapsed);
+//     if (remaining < 0) remaining = 0;
+//     return remaining;
+// }
 

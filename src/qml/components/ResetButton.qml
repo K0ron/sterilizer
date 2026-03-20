@@ -10,19 +10,14 @@ Rectangle {
 
     // API
     property bool enabled: true
-    property string mode: "stop"
-    signal stopClicked
     signal resetClicked
 
-    // stryle
-    readonly property bool isStop: root.mode === "stop"
-
-    color: !root.enabled ? "#BDBDBD" : (isStop ? "#E53935" : "#111111")
+    color: root.enabled ? "#111111" : "#BDBDBD"
     opacity: root.enabled ? 1.0 : 0.7
 
     Text {
         anchors.centerIn: parent
-        text: isStop ? "STOP" : "RESET"
+        text: "RESET"
         color: "#ffffff"
         font.pixelSize: 18
         font.bold: true
@@ -33,15 +28,8 @@ Rectangle {
         anchors.fill: parent
         enabled: root.enabled
         onClicked: {
-            if (root.isStop)
-                root.stopClicked();
-            else
-                root.resetClicked();
+            root.resetClicked();
         }
-
-        onPressed: root.scale = 0.98
-        onReleased: root.scale = 1.0
-        onCanceled: root.scale = 1.0
     }
 
     Behavior on scale {

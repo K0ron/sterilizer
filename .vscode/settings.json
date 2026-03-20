@@ -1,4 +1,5 @@
 {
     "github.copilot.nextEditSuggestions.enabled": true,
-    "github.copilot.nextEditSuggestions.allowWhitespaceOnlyChanges": true
+    "github.copilot.nextEditSuggestions.allowWhitespaceOnlyChanges": true,
+    "C_Cpp.errorSquiggles": "disabled"
 }

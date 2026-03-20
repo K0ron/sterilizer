@@ -125,7 +125,6 @@ Rectangle {
         enabled: root.enabled
 
         onClicked: {
-            root.running = !root.running;
             root.clicked();
         }
 
