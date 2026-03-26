@@ -2,44 +2,76 @@ import QtQuick
 
 Item {
     id: root
-    width: 92
-    height: 22
+    width: 156
+    height: 6
 
     property bool active: false
     property real temperature: 0
-    property real wavePhase: 0
+    property real targetTemperature: 100
+    readonly property real progress: {
+        if (targetTemperature <= 0)
+            return 0;
+        return Math.max(0, Math.min(1, temperature / targetTemperature));
+    }
+    readonly property color fillColor: progress < 0.5 ? "#5BBE63" : (progress < 0.9 ? "#F0A53A" : "#D94A3A")
 
-    function waveValue(offset) {
-        const t = (wavePhase + offset) % 1.0;
-        return 0.5 + 0.5 * Math.sin(t * Math.PI * 2);
+    Rectangle {
+        anchors.fill: parent
+        radius: height / 2
+        color: "#d7d7d7"
+        opacity: 0.75
     }
 
-    NumberAnimation on wavePhase {
-        running: root.active
-        from: 0
-        to: 1
-        duration: 1100
-        loops: Animation.Infinite
-    }
+    Rectangle {
+        id: fill
+        width: parent.width * root.progress
+        height: parent.height
+        radius: height / 2
+        color: root.fillColor
+        clip: true
 
-    Row {
-        anchors.centerIn: parent
-        spacing: 10
+        Behavior on width {
+            NumberAnimation {
+                duration: 260
+                easing.type: Easing.OutCubic
+            }
+        }
 
-        Repeater {
-            model: 3
+        Rectangle {
+            anchors.fill: parent
+            radius: height / 2
+            color: '#ff0000'
+            opacity: 0.08
+        }
 
-            Rectangle {
-                required property int index
+        Rectangle {
+            id: shimmer
+            width: 36
+            height: parent.height + 8
+            y: -4
+            radius: width / 2
+            visible: root.active && fill.width > 0
+            color: "#ffffff"
+            opacity: 0.24
+            rotation: 12
+            x: -width
 
-                width: 12
-                height: 12
-                radius: 6
-                color: root.temperature < 50 ? "#5BBE63"
-                    : (root.temperature < 90 ? "#F0A53A" : "#D94A3A")
-                readonly property real intensity: root.active ? root.waveValue(index * 0.16) : 0.0
-                opacity: root.active ? (0.35 + intensity * 0.65) : 0.22
-                scale: root.active ? (0.9 + intensity * 0.28) : 0.9
+            SequentialAnimation on x {
+                running: root.active && fill.width > 0
+                loops: Animation.Infinite
+
+                PauseAnimation {
+                    duration: 120
+                }
+                NumberAnimation {
+                    from: -shimmer.width
+                    to: Math.max(fill.width - shimmer.width * 0.35, -shimmer.width)
+                    duration: 900
+                    easing.type: Easing.InOutSine
+                }
+                PauseAnimation {
+                    duration: 180
+                }
             }
         }
     }

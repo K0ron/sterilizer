@@ -10,6 +10,7 @@ Item {
     property int temperatureStep: 1
     property int selectedTemperature: 40
     property int currentTemperature: 99
+    property bool showCurrentTemperatureBadge: false
 
     // Edition mode
     property bool editing: false
@@ -178,12 +179,12 @@ Item {
 
     Rectangle {
         id: currentTemperatureBox
-        visible: !root.editing
+        visible: root.showCurrentTemperatureBadge
         width: root.currentTemperature >= 100 ? 70 : 60
         height: 35
         radius: 8
         color: "#ccc"
-        y: -10
+        y: 120
         anchors.horizontalCenter: displayRow.horizontalCenter
 
         Row {

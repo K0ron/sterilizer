@@ -59,6 +59,7 @@ ApplicationWindow {
 
                     selectedTemperature: selectedTemp
                     currentTemperature: sterilizer.temperature
+                    showCurrentTemperatureBadge: sterilizer.state === stateHeating || sterilizer.state === stateHold || sterilizer.state === statePaused
 
                     onCommitted: function (t) {
                         selectedTemp = t;
@@ -68,10 +69,10 @@ ApplicationWindow {
                 HeatingIndicator {
                     anchors.top: temperaturePicker.bottom
                     anchors.topMargin: 8
-                    anchors.horizontalCenter: temperaturePicker.horizontalCenter
                     active: sterilizer.state === stateHeating
                     temperature: sterilizer.temperature
-                    visible: sterilizer.state === stateHeating
+                    targetTemperature: selectedTemp
+                    visible: sterilizer.state === stateHeating || sterilizer.state === stateHold || sterilizer.state === statePaused
                 }
             }
         }
@@ -95,12 +96,10 @@ ApplicationWindow {
         }
 
         StartButton {
-            //y: 250
             anchors.verticalCenter: parent.verticalCenter
             anchors.horizontalCenter: parent.horizontalCenter
             enabled: true
             running: sterilizer.state === stateHeating || sterilizer.state === stateHold
-
             onClicked: {
                 if (sterilizer.state === stateHeating || sterilizer.state === stateHold) {
                     sterilizer.pause();
@@ -108,21 +107,15 @@ ApplicationWindow {
                     if (sterilizer.state === stateIdle || sterilizer.state === stateFinished) {
                         sterilizer.configure(selectedTemp, selectedSeconds);
                     }
-
                     sterilizer.start();
                 }
             }
         }
 
         ResetButton {
-            // x: 500
-            // y: 300
             anchors.right: parent.right
-
             anchors.verticalCenter: parent.verticalCenter
-
             enabled: sterilizer.state === statePaused || sterilizer.state === stateFinished || sterilizer.state === stateError
-
             onResetClicked: {
                 sterilizer.reset();
             }

@@ -184,7 +184,7 @@ void Sterilizer::reset() {
     heaterActive = false;
     timerActive = false;
 
-    currentTemperature = 20.0f;
+    currentTemperature = 30.0f;
     currentState = State::IDLE;
 
     m_remainingTime = 0;
