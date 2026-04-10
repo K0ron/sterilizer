@@ -4,8 +4,8 @@ import QtQuick.Shapes
 
 Rectangle {
     id: root
-    width: 120
-    height: 120
+    width: 180
+    height: 180
     radius: height / 2
 
     // API
@@ -19,7 +19,7 @@ Rectangle {
         anchors.centerIn: parent
         text: "STOP"
         color: "#ffffff"
-        font.pixelSize: 18
+        font.pixelSize: 30
         font.bold: true
         font.letterSpacing: 0.8
     }

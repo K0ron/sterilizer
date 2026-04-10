@@ -11,8 +11,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 
 
-# Qt6 quick (QML)
-find_package(Qt6 COMPONENTS Quick REQUIRED)
+# Qt6 quick (QML) + SVG support for QML Image/qrc assets
+find_package(Qt6 COMPONENTS Quick Svg REQUIRED)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
@@ -42,6 +42,6 @@ target_include_directories(Sterilizer PRIVATE
 
 target_link_libraries(Sterilizer PRIVATE
     Qt6::Quick
+    Qt6::Svg
 )
-
 

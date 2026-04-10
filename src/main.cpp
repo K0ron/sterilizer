@@ -4,6 +4,7 @@
 #include <QTimer>
 #include <QDir>
 #include <QDebug>
+#include <QImageReader>
 
 #include "core/sterilizer.h"
 
@@ -11,8 +12,6 @@ int main(int argc, char *argv[])
 
 {
     QGuiApplication app(argc, argv);
-    
-    qDebug() << "QRC /qml contents:" << QDir(":/qml").entryList();
 
     Sterilizer sterilizer;
     

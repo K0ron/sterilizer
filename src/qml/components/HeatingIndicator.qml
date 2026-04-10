@@ -2,7 +2,7 @@ import QtQuick
 
 Item {
     id: root
-    width: 156
+    width: 200
     height: 6
 
     property bool active: false

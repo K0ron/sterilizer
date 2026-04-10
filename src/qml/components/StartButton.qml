@@ -4,9 +4,15 @@ import QtQuick.Shapes
 
 Rectangle {
     id: root
-    width: 180
-    height: 180
+    width: 250
+    height: 250
     radius: height / 2
+    readonly property real size: Math.min(width, height)
+    readonly property real outerRadius: size / 2
+    readonly property real innerRadius: innerDisc.width / 2
+    readonly property real ringThickness: outerRadius - innerRadius
+    readonly property real ringRadius: innerRadius + ringThickness / 2
+    readonly property real iconSize: size * 0.36
 
     // API
     property bool enabled: true
@@ -20,8 +26,8 @@ Rectangle {
     Rectangle {
         id: innerDisc
         anchors.centerIn: parent
-        width: 160
-        height: 160
+        width: root.size * 0.92
+        height: root.size * 0.92
         radius: height / 2
         color: "#e7e7e7"
         z: 0
@@ -44,15 +50,15 @@ Rectangle {
                 anchors.fill: parent
                 opacity: 0.20
                 ShapePath {
-                    strokeWidth: 8
+                    strokeWidth: Math.max(2, root.ringThickness * 0.4)
                     strokeColor: "#ffffff"
                     capStyle: ShapePath.RoundCap
                     fillColor: "transparent"
                     PathAngleArc {
                         centerX: root.width / 2
                         centerY: root.height / 2
-                        radiusX: 86
-                        radiusY: 86
+                        radiusX: root.ringRadius
+                        radiusY: root.ringRadius
                         startAngle: -12
                         sweepAngle: 18
                     }
@@ -64,15 +70,15 @@ Rectangle {
                 anchors.fill: parent
                 opacity: 0.07
                 ShapePath {
-                    strokeWidth: 18
+                    strokeWidth: Math.max(4, root.ringThickness * 0.9)
                     strokeColor: "#ffffff"
                     capStyle: ShapePath.RoundCap
                     fillColor: "transparent"
                     PathAngleArc {
                         centerX: root.width / 2
                         centerY: root.height / 2
-                        radiusX: 88
-                        radiusY: 88
+                        radiusX: root.ringRadius
+                        radiusY: root.ringRadius
                         startAngle: -16
                         sweepAngle: 26
                     }
@@ -84,15 +90,15 @@ Rectangle {
                 anchors.fill: parent
                 opacity: 0.03
                 ShapePath {
-                    strokeWidth: 30
+                    strokeWidth: Math.max(6, root.ringThickness * 1.5)
                     strokeColor: "#ffffff"
                     capStyle: ShapePath.RoundCap
                     fillColor: "transparent"
                     PathAngleArc {
                         centerX: root.width / 2
                         centerY: root.height / 2
-                        radiusX: 91
-                        radiusY: 91
+                        radiusX: root.ringRadius
+                        radiusY: root.ringRadius
                         startAngle: -22
                         sweepAngle: 40
                     }
@@ -114,10 +120,17 @@ Rectangle {
     Image {
         id: icon
         anchors.centerIn: parent
-        source: root.running ? "qrc:/qml/icons/pause-svgrepo-com.svg" : "qrc:/qml/icons/play-svgrepo-com.svg"
-        width: 70
-        height: 70
+        source: root.running ? (root.enabled ? "qrc:/qml/icons/pause-svgrepo-com.svg" : "qrc:/qml/icons/pause-disabled.svg") : (root.enabled ? "qrc:/qml/icons/play-svgrepo-com.svg" : "qrc:/qml/icons/play-disabled.svg")
+        width: root.iconSize
+        height: root.iconSize
+        fillMode: Image.PreserveAspectFit
         z: 2
+
+        onStatusChanged: {
+            if (status === Image.Error) {
+                console.log("Failed to load icon:", source);
+            }
+        }
     }
 
     MouseArea {

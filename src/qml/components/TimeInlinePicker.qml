@@ -77,8 +77,8 @@ Item {
 
             Rectangle {
                 id: hoursBox
-                width: 110
-                height: 64
+                width: 200
+                height: 110
                 radius: 12
                 color: "#ffffff"
                 clip: false
@@ -87,7 +87,7 @@ Item {
                     id: hoursWheel
                     visible: root.editing && root.editingPart === 0
                     width: hoursBox.width
-                    height: 200
+                    height: 300
                     x: 0
                     y: parent.height / 2 - height / 2
 
@@ -111,7 +111,7 @@ Item {
                         Text {
                             anchors.centerIn: parent
                             text: v < 10 ? ("0" + v) : ("" + v)
-                            font.pixelSize: parent.current ? 42 : 22
+                            font.pixelSize: parent.current ? 60 : 30
                             font.bold: parent.current
                             color: "#111"
                             opacity: parent.current ? 1.0 : 0.35
@@ -179,7 +179,7 @@ Item {
                     anchors.centerIn: parent
                     text: root.two(root.hours())
                     color: "#111"
-                    font.pixelSize: 42
+                    font.pixelSize: 60
                     font.bold: true
                 }
 
@@ -197,7 +197,7 @@ Item {
             Text {
                 text: "h"
                 color: "#666"
-                font.pixelSize: 20
+                font.pixelSize: 30
                 anchors.verticalCenter: hoursBox.verticalCenter
             }
         }
@@ -216,15 +216,15 @@ Item {
             Rectangle {
                 id: minutesBox
                 radius: 12
-                width: 110
-                height: 64
+                height: 110
+                width: 200
                 clip: false
 
                 Tumbler {
                     id: minutesWheel
                     visible: root.editing && root.editingPart === 1
                     width: minutesBox.width
-                    height: 200
+                    height: 300
                     x: 0
                     y: parent.height / 2 - height / 2
 
@@ -248,7 +248,7 @@ Item {
                         Text {
                             anchors.centerIn: parent
                             text: v < 10 ? ("0" + v) : ("" + v)
-                            font.pixelSize: parent.current ? 42 : 22
+                            font.pixelSize: parent.current ? 60 : 30
                             font.bold: parent.current
                             color: "#111"
                             opacity: parent.current ? 1.0 : 0.35
@@ -295,7 +295,6 @@ Item {
                             }
                         }
                     }
-
                 }
 
                 Rectangle {
@@ -316,7 +315,7 @@ Item {
                     anchors.centerIn: parent
                     text: root.two(root.minutes())
                     color: "#111"
-                    font.pixelSize: 42
+                    font.pixelSize: 60
                     font.bold: true
                 }
 
@@ -334,7 +333,7 @@ Item {
             Text {
                 text: "m"
                 color: "#666"
-                font.pixelSize: 20
+                font.pixelSize: 30
                 anchors.verticalCenter: minutesBox.verticalCenter
             }
         }
@@ -353,22 +352,22 @@ Item {
             Rectangle {
                 id: secondesBox
                 radius: 12
-                width: 100
-                height: 64
+                width: 200
+                height: 110
                 clip: false
 
                 Text {
                     anchors.centerIn: parent
                     text: root.two(root.seconds())
                     color: "#111"
-                    font.pixelSize: 32
+                    font.pixelSize: 42
                     font.bold: true
                 }
             }
             Text {
                 text: "s"
                 color: "#666"
-                font.pixelSize: 20
+                font.pixelSize: 30
                 anchors.verticalCenter: secondesBox.verticalCenter
             }
         }

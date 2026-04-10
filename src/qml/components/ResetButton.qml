@@ -4,8 +4,8 @@ import QtQuick.Shapes
 
 Rectangle {
     id: root
-    width: 120
-    height: 64
+    width: 200
+    height: 114
     radius: height / 2
 
     // API
@@ -19,7 +19,7 @@ Rectangle {
         anchors.centerIn: parent
         text: "RESET"
         color: "#ffffff"
-        font.pixelSize: 18
+        font.pixelSize: 30
         font.bold: true
         font.letterSpacing: 0.8
     }

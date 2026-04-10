@@ -8,9 +8,11 @@ Item {
     property int maxTemperature: 210
     property int minTemperature: 30
     property int temperatureStep: 1
-    property int selectedTemperature: 40
+    property int selectedTemperature: 0
     property int currentTemperature: 99
     property bool showCurrentTemperatureBadge: false
+    readonly property bool hasValidSelection: selectedTemperature >= minTemperature && selectedTemperature <= maxTemperature
+    readonly property string displayTemperatureText: hasValidSelection ? selectedTemperature.toString() : "--"
 
     // Edition mode
     property bool editing: false
@@ -37,6 +39,12 @@ Item {
         committed(selectedTemperature);
     }
 
+    function resetSelection() {
+        commitTimer.stop();
+        editing = false;
+        selectedTemperature = 0;
+    }
+
     Timer {
         id: commitTimer
         interval: 1000
@@ -51,19 +59,20 @@ Item {
 
         Rectangle {
             id: temperatureBox
-            width: 110
-            height: 64
+            width: 200
+            height: 110
             radius: 16
 
             Tumbler {
                 id: temperatureWheel
                 visible: root.editing
+                wrap: false
                 width: parent.width
-                height: 200
+                height: 300
                 x: 0
                 y: parent.height / 2 - height / 2
                 model: Math.floor((root.maxTemperature - root.minTemperature) / root.temperatureStep) + 1
-                currentIndex: Math.floor((root.selectedTemperature - root.minTemperature) / root.temperatureStep)
+                currentIndex: root.hasValidSelection ? Math.floor((root.selectedTemperature - root.minTemperature) / root.temperatureStep) : 0
 
                 onCurrentIndexChanged: {
                     if (!root.editing)
@@ -83,7 +92,7 @@ Item {
                     Text {
                         anchors.centerIn: parent
                         text: v
-                        font.pixelSize: parent.current ? 42 : 22
+                        font.pixelSize: parent.current ? 60 : 30
                         font.bold: parent.current
                         color: "#111"
                         opacity: parent.current ? 1.0 : 0.35
@@ -146,9 +155,9 @@ Item {
             Text {
                 opacity: !root.editing
                 anchors.centerIn: parent
-                text: root.selectedTemperature
+                text: root.displayTemperatureText
                 color: "#111"
-                font.pixelSize: 42
+                font.pixelSize: 60
                 font.bold: true
             }
 
@@ -163,8 +172,8 @@ Item {
             Text {
                 visible: !root.editing
                 anchors.centerIn: parent
-                text: root.selectedTemperature
-                font.pixelSize: 42
+                text: root.displayTemperatureText
+                font.pixelSize: 60
                 font.bold: true
             }
         }
@@ -172,7 +181,7 @@ Item {
         Text {
             text: "°C"
             color: "#666"
-            font.pixelSize: 20
+            font.pixelSize: 30
             anchors.verticalCenter: temperatureBox.verticalCenter
         }
     }
@@ -180,11 +189,11 @@ Item {
     Rectangle {
         id: currentTemperatureBox
         visible: root.showCurrentTemperatureBadge
-        width: root.currentTemperature >= 100 ? 70 : 60
-        height: 35
+        width: root.currentTemperature >= 100 ? 120 : 100
+        height: 60
         radius: 8
         color: "#ccc"
-        y: 120
+        y: 200
         anchors.horizontalCenter: displayRow.horizontalCenter
 
         Row {
@@ -193,13 +202,13 @@ Item {
 
             Text {
                 text: root.currentTemperature === 0 ? "--" : Math.round(root.currentTemperature)
-                font.pixelSize: 20
+                font.pixelSize: 30
                 font.bold: false
             }
 
             Text {
                 text: "°C"
-                font.pixelSize: 15
+                font.pixelSize: 20
                 font.bold: false
             }
         }

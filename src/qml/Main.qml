@@ -4,8 +4,8 @@ import "components"
 
 ApplicationWindow {
     visible: true
-    width: 700
-    height: 480
+    width: 1280
+    height: 720
     title: "Sterilizer"
     color: '#e7e7e7'
 
@@ -16,15 +16,15 @@ ApplicationWindow {
     readonly property int stateError: 4
     readonly property int statePaused: 5
 
-    property int selectedTemp: 40
+    property int selectedTemp: 0
     property int selectedSeconds: 60
 
     Rectangle {
         id: background
         // anchors.centerIn: parent
         anchors.horizontalCenter: parent.horizontalCenter
-        width: 650
-        height: 100
+        width: 1150
+        height: 150
         radius: 12
         color: "#ffffff"
         y: 100
@@ -36,12 +36,12 @@ ApplicationWindow {
             anchors.left: parent.left
             anchors.leftMargin: 20
 
-            spacing: 10
+            spacing: 150
 
             TimeInlinePicker {
                 id: timePicker
-                width: 440
-                height: 100
+                width: 640
+                height: background.height
                 totalSeconds: (sterilizer.state === stateHeating || sterilizer.state === stateHold || sterilizer.state === stateFinished || sterilizer.state === statePaused) ? sterilizer.remainingTime : selectedSeconds
                 onCommitted: function (s) {
                     selectedSeconds = s;
@@ -54,12 +54,16 @@ ApplicationWindow {
 
                 TemperaturePicker {
                     id: temperaturePicker
-                    width: 200
-                    height: 100
+                    width: parent.width
+                    height: background.height
 
                     selectedTemperature: selectedTemp
                     currentTemperature: sterilizer.temperature
                     showCurrentTemperatureBadge: sterilizer.state === stateHeating || sterilizer.state === stateHold || sterilizer.state === statePaused
+
+                    onChanged: function (t) {
+                        selectedTemp = t;
+                    }
 
                     onCommitted: function (t) {
                         selectedTemp = t;
@@ -68,7 +72,7 @@ ApplicationWindow {
 
                 HeatingIndicator {
                     anchors.top: temperaturePicker.bottom
-                    anchors.topMargin: 8
+                    anchors.topMargin: 20
                     active: sterilizer.state === stateHeating
                     temperature: sterilizer.temperature
                     targetTemperature: selectedTemp
@@ -79,10 +83,10 @@ ApplicationWindow {
     }
 
     Item {
-        width: 600
-        height: 180
+        width: 900
+        height: 240
         anchors.horizontalCenter: parent.horizontalCenter
-        y: 250
+        y: 400
 
         EmergencyButton {
             anchors.left: parent.left
@@ -98,7 +102,7 @@ ApplicationWindow {
         StartButton {
             anchors.verticalCenter: parent.verticalCenter
             anchors.horizontalCenter: parent.horizontalCenter
-            enabled: true
+            enabled: sterilizer.state === stateHeating || sterilizer.state === stateHold || selectedTemp >= temperaturePicker.minTemperature
             running: sterilizer.state === stateHeating || sterilizer.state === stateHold
             onClicked: {
                 if (sterilizer.state === stateHeating || sterilizer.state === stateHold) {
@@ -118,6 +122,8 @@ ApplicationWindow {
             enabled: sterilizer.state === statePaused || sterilizer.state === stateFinished || sterilizer.state === stateError
             onResetClicked: {
                 sterilizer.reset();
+                selectedTemp = 0;
+                temperaturePicker.resetSelection();
             }
         }
     }
