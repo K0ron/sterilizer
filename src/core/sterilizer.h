@@ -42,6 +42,7 @@ public:
     int remainingTime() const;
 
     int stateInt() const { return static_cast<int>(state()); }
+     
 
 signals:
     void temperatureChanged();

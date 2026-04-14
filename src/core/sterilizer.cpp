@@ -231,16 +231,29 @@ void Sterilizer::checkOverheat() {
 }
 
 float Sterilizer::readSensorTemperature() {
-    ifstream file("/sys/class/thermal/thermal_zone0/temp");
-    
+std::ifstream file("/sys/bus/w1/devices/28-000011263fcf/w1_slave");
+
     if (!file.is_open()) {
-        triggerError("Failed to read temperature sensor");
-        return currentTemperature; // Return last known temperature
+        triggerError("Impossible de lire le capteur 1-Wire");
+        return currentTemperature;
     }
 
-    int tempMilli;
-    file >> tempMilli;
-    return tempMilli / 1000.0f; // Convert from millidegrees to degrees
+    std::string line;
+    std::string content;
+
+    while (std::getline(file, line)) {
+        content += line;
+    }
+
+    // Cherche "t="
+    size_t pos = content.find("t=");
+    if (pos == std::string::npos) {
+        triggerError("Format capteur invalide");
+        return currentTemperature;
+    }
+
+    int tempMilli = std::stoi(content.substr(pos + 2));
+    return tempMilli / 1000.0f;
 }
 
 
