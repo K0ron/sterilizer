@@ -143,6 +143,13 @@ void Sterilizer::update() {
 
     // Hold State
     if (currentState == State::HOLD && timerActive) {
+
+        float newTemp = readSensorTemperature();
+
+        if (newTemp != currentTemperature) {
+            currentTemperature = newTemp;
+            emit temperatureChanged();
+        }
         static constexpr double HOLD_HYSTERESIS = 1.0;
 
         if (currentTemperature <= config.targetTemperature - HOLD_HYSTERESIS) {
