@@ -1,6 +1,8 @@
 #include "sterilizer.h"
 #include <QString>
 #include <iostream>
+#include <fstream>
+#include <string>
 using namespace std;
 
 
