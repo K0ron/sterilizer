@@ -5,7 +5,7 @@ using namespace std;
 
 
 Sterilizer::Sterilizer(QObject* parent) : QObject(parent) {
-    currentTemperature = 30.0f; // Ambient temperature
+    currentTemperature = readSensorTemperature(); 
     currentState = State::IDLE;
     heaterActive = false;
     timerActive = false;
@@ -110,9 +110,17 @@ void Sterilizer::update() {
         checkOverheat();
 
         // every 3s -> +1°C
-        if (now - lastHeatUpdate >= std::chrono::seconds(3)) {
-            currentTemperature += 1.0f;
-            lastHeatUpdate = std::chrono::steady_clock::now();
+        // if (now - lastHeatUpdate >= std::chrono::seconds(3)) {
+        //     currentTemperature += 1.0f;
+        //     lastHeatUpdate = std::chrono::steady_clock::now();
+
+        //     emit temperatureChanged();
+        // }
+
+        float newTemp = readSensorTemperature();
+
+        if (newTemp != currentTemperature) {
+            currentTemperature = newTemp;
 
             emit temperatureChanged();
         }
@@ -220,6 +228,19 @@ void Sterilizer::checkOverheat() {
         triggerError("Overheat beyond target");
         return;
     }
+}
+
+float Sterilizer::readSensorTemperature() {
+    ifstream file("/sys/class/thermal/thermal_zone0/temp");
+    
+    if (!file.is_open()) {
+        triggerError("Failed to read temperature sensor");
+        return currentTemperature; // Return last known temperature
+    }
+
+    int tempMilli;
+    file >> tempMilli;
+    return tempMilli / 1000.0f; // Convert from millidegrees to degrees
 }
 
 

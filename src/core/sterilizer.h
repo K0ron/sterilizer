@@ -53,6 +53,7 @@ private:
 
     void checkOverheat();
     void triggerError(const std::string& reason);
+    float readSensorTemperature();
 
 private:
     Configuration config;
